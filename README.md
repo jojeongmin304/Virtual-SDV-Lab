@@ -9,7 +9,8 @@
 
 
 ## get Starting
-# .env.example 파일 기반으로 본인 환경 맞게 .env파일 생성하기
+
+##.env.example 파일 기반으로 본인 환경 맞게 .env파일 생성하기
 ```bash
 cp .env.example .env
 # basic (only KUKSA)
