@@ -1,12 +1,17 @@
 version: "3.9"
 
+# ─────────────────────────────────────────────────────────────
+#  필수: KUKSA Databroker + Zenoh(통신/서비스 레이어)
+#  옵션: CARLA, Mosquitto, uProtocol 샘플, (Ankaios는 orchestration 단계에서)
+#  OS가 Windows/Mac이면 host 네트 대신 ports 매핑 (아래 주석 참고)
+# ─────────────────────────────────────────────────────────────
 
 services:
 # 1) Eclipse KUKSA Databroker (VSS gRPC)
   kuksa:
      image: ghcr.io/eclipse-kuksa/kuksa-databroker:0.5.0
      command: ["--insecure", "--port", "${KUKSA_PORT:-55555}"]
-     # Linux에서 빠르게 실습하려면 host 네트워크 권장
+     # Linux에서 빠르게 실습 -> host 네트워크 권장
      network_mode: "host"
      restart: unless-stopped
      healthcheck:
@@ -22,7 +27,6 @@ services:
     environment:
       - RUST_LOG=info
     restart: unless-stopped
-    profiles: ["comm"] # 필요 시에만 켬
 
 
 # 3) CARLA 시뮬레이터 (옵션: 무거움)
@@ -40,9 +44,23 @@ services:
     profiles: ["sim"]
 
 
-# (옵션) uProtocol / Ankaios / MQTT 등은 필요 시 아래에 서비스 블록 추가
-# uprotocol:
-#   image: ghcr.io/your-org/uproto-demo:0.1.0
-#   network_mode: "host"
-#   restart: unless-stopped
-#   profiles: ["comm"]
+# 4) Mosquitto (MQTT 브로커 – Zenoh와 병행 실험용) ← 프로필: comm
+  mosquitto:
+    image: eclipse-mosquitto:2
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    ports:
+      - "${MQTT_PORT:-1883}:1883"
+    restart: unless-stopped
+    profiles: ["comm"]
+
+# 5) uProtocol 샘플(이미지 정해지면 교체) ← 프로필: uproto
+#  # 실제 사용할 uProtocol 데모 이미지 경로로 바꾸세요.
+#  uprotocol-demo:
+#    image: ghcr.io/your-org/uprotocol-demo:0.1.0
+#    depends_on: [zenoh]
+#    network_mode: "host"   # Windows/Mac이면 ports 매핑으로 대체
+#    # ports:
+#    #   - "9000:9000"
+#    restart: unless-stopped
+#    profiles: ["uproto"]

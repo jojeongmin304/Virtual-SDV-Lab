@@ -13,11 +13,10 @@
 # .env.example 파일 기반으로 본인 환경 맞게 .env파일 생성하기
 cp .env.example .env
 
-# basic (only KUKSA)
+# basic (KUKSA + zenoh)
 docker compose up -d
 
-
-# + Zenoh
+# + MQTT
 docker compose --profile comm up -d
 
 
