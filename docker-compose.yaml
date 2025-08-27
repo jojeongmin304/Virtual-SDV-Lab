@@ -1,0 +1,48 @@
+version: "3.9"
+
+
+services:
+# 1) Eclipse KUKSA Databroker (VSS gRPC)
+  kuksa:
+     image: ghcr.io/eclipse-kuksa/kuksa-databroker:0.5.0
+     command: ["--insecure", "--port", "${KUKSA_PORT:-55555}"]
+     # Linux에서 빠르게 실습하려면 host 네트워크 권장
+     network_mode: "host"
+     restart: unless-stopped
+     healthcheck:
+       test: ["CMD", "sh", "-lc", "nc -z 127.0.0.1 ${KUKSA_PORT:-55555}"]
+       interval: 5s
+       timeout: 2s
+       retries: 10  
+  
+# 2) Eclipse Zenoh (통신/서비스 레이어)
+  zenoh:
+    image: eclipse/zenoh:latest
+    network_mode: "host" # 멀티캐스트/피어 디스커버리 편의
+    environment:
+      - RUST_LOG=info
+    restart: unless-stopped
+    profiles: ["comm"] # 필요 시에만 켬
+
+
+# 3) CARLA 시뮬레이터 (옵션: 무거움)
+  carla:
+    image: carlasim/carla:latest
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    ports:
+      - "${CARLA_PORT_LOW:-2000}-${CARLA_PORT_HIGH:-2002}:2000-2002"
+      - "${CARLA_WEBUI_PORT:-8080}:8080"
+    shm_size: "2gb"
+    restart: unless-stopped
+    profiles: ["sim"]
+
+
+# (옵션) uProtocol / Ankaios / MQTT 등은 필요 시 아래에 서비스 블록 추가
+# uprotocol:
+#   image: ghcr.io/your-org/uproto-demo:0.1.0
+#   network_mode: "host"
+#   restart: unless-stopped
+#   profiles: ["comm"]

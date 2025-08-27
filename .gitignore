@@ -1,0 +1,34 @@
+# --- 환경 변수/비밀 ---
+.env
+.env.* 
+!.env.example
+
+# --- 로그/캐시/임시 ---
+*.log
+logs/
+tmp/
+*.pid
+
+# --- Python (예제/툴 스크립트 대비) ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+pip-wheel-metadata/
+
+# --- IDE/OS 잡파일 ---
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# --- Docker/Compose 로컬 오버라이드(원하면 무시) ---
+docker-compose.override.yml
+
+# --- 기타 빌드/산출물(옵션) ---
+dist/
+build/
